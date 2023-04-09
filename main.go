@@ -11,11 +11,14 @@ import (
 	"bufio"
 	"container/ring"
 	"fmt"
+	"log"
 	"math"
 	"os"
 	"strconv"
 	"sync"
 	"time"
+
+	"gopkg.in/natefinch/lumberjack.v2"
 )
 
 type RingBuffer struct {
@@ -33,6 +36,16 @@ const delay time.Duration = 5 // секунды
 func main() {
 
 	fmt.Println("Для завершения работы введите - 'exit'")
+	LOG_FILE_PATH := os.Getenv("LOG_FILE_PATH")
+	if LOG_FILE_PATH != "" {
+		log.SetOutput(&lumberjack.Logger{
+			Filename:   LOG_FILE_PATH,
+			MaxSize:    200,
+			MaxBackups: 3,
+			MaxAge:     3,
+			Compress:   true,
+		})
+	}
 
 	stop := make(chan int)  // канал для уведомления о закрытии программы
 	input := make(chan int) // входной канал данных
