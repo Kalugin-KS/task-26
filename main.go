@@ -36,6 +36,7 @@ const delay time.Duration = 5 // секунды
 func main() {
 
 	fmt.Println("Для завершения работы введите - 'exit'")
+
 	LOG_FILE_PATH := os.Getenv("LOG_FILE_PATH")
 	if LOG_FILE_PATH != "" {
 		log.SetOutput(&lumberjack.Logger{
@@ -141,6 +142,7 @@ func nonNegative(input chan int, chNeg chan int) {
 	for i := range input {
 		if i > 0 {
 			chNeg <- i
+			log.Println("Фильтрация отрицательных чисел")
 		}
 	}
 }
@@ -151,8 +153,10 @@ func multiOfThree(chNeg chan int, chMul chan int) {
 		x := <-chNeg
 		if math.Mod(float64(x), 3) == 0 {
 			chMul <- int(x)
+			log.Println("Фильтрация чисел не кратных трем")
 		}
 	}
+
 }
 
 // Функция записи данных в буфер и получения из него
@@ -162,12 +166,15 @@ func bufferStage(chMul chan int, chBuffer chan int) {
 		select {
 		case data := <-chMul:
 			rb.Push(data)
+			log.Println("Запись данных в буфер")
 
 		case <-time.After(time.Duration(delay * time.Second)):
 			bufferData := rb.Get()
 			for _, data := range bufferData {
 				chBuffer <- data.(int)
 			}
+			log.Println("Получение данных из буфера")
 		}
 	}
+
 }
